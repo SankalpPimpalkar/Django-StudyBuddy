@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Welcome, {{request.user.username}}
+    </title>
+</head>
+<body>
+    {% include "navbar.html" %}
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>
+                    {{message}}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+    {% endif %}
+
+    {% block content %}
+        Default Content
+    {% endblock %}
+</body>
+</html>
