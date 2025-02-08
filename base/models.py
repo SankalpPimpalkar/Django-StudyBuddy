@@ -15,7 +15,7 @@ class Room(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True)
     host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    # participants = 
+    participants = models.ManyToManyField(User, related_name='participants', blank=True)
     
     class Meta:
         ordering = ['-updated','-created']
@@ -30,5 +30,8 @@ class Message(models.Model):
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        ordering = ['-updated','-created']
+    
     def __str__(self):
-        return self.body[0:10]
+        return self.body[0:50]

@@ -11,4 +11,6 @@ urlpatterns = [
     path('create-room/', createRoom, name='create_room'),
     path('update-room/<str:pk>', updateRoom, name='update_room'),
     path('delete-room/<str:pk>', deleteRoom, name='delete_room'),
+    
+    path('delete-message/<str:pk>', deleteMessage, name='delete_message'),
 ]

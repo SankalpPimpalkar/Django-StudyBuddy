@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from .models import Room,Topic
+from .models import Room,Topic,Message
 from .forms import RoomForm
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -71,11 +71,13 @@ def home(request):
     )
     topics = Topic.objects.all()
     room_count = rooms.count()
-
+    room_messages = Message.objects.all()
+    
     context = {
         'rooms': rooms,
         'topics': topics,
         'room_count': room_count,
+        'room_messages': room_messages,
     }
     
     return render(request, 'home.html', context) 
@@ -83,7 +85,23 @@ def home(request):
 def room(request, pk):
     
     room = Room.objects.get(id=pk)
-    context = {'room': room}
+    room_messages = room.message_set.all().order_by('-created')
+    participants = room.participants.all()
+    
+    if request.method == "POST":
+        Message.objects.create(
+            user= request.user,
+            room=room,
+            body=request.POST.get('body')
+        )
+        room.participants.add(request.user)
+        return redirect('room_page', pk=room.id)
+    
+    context = {
+        'room': room,
+        'room_messages': room_messages,
+        'participants': participants,
+    }
     
     return render(request, 'room.html', context)
 
@@ -118,8 +136,23 @@ def updateRoom(request, pk):
     return render(request, 'room_form.html', context)
 
 def deleteRoom(request,pk):
+    page = 'room'
     room = Room.objects.get(id=pk)
     if request.method == 'POST':
         room.delete()
         return redirect('home')
-    return render(request, 'delete.html')
+    return render(request, 'delete.html', {'page': page})
+
+@login_required(login_url='login_page')
+def deleteMessage(request, pk):
+    room_message = Message.objects.get(id=pk)
+    page = f"'{room_message.body}'"
+
+    if request.user != room_message.user:
+        return HttpResponse('You are not creator of this message')
+    
+    if request.method == 'POST':
+        room_message.delete()
+        return redirect('room_page')
+    
+    return render(request, 'delete.html', {'page': page})
